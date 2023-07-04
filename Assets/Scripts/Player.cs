@@ -1,13 +1,11 @@
 using UnityEngine;
 using System;
 
-public class Player : MonoBehaviour
-{
+public class Player : MonoBehaviour {
   public static Player Instance { get; private set; }
 
   public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
-  public class OnSelectedCounterChangedEventArgs : EventArgs
-  {
+  public class OnSelectedCounterChangedEventArgs : EventArgs {
     public ClearCounter selectedCounter;
   }
 
@@ -19,75 +17,60 @@ public class Player : MonoBehaviour
   private Vector3 lastInteractDir;
   private ClearCounter selectedCounter;
 
-  private void Awake()
-  {
-    if (Instance != null)
-    {
+  private void Awake() {
+    if (Instance != null) {
       Debug.LogError("There is more than one Player instance");
     }
     Instance = this;
   }
 
-  private void Start()
-  {
+  private void Start() {
     gameInput.OnInteractAction += GameInput_OnInteractAction;
   }
 
-  private void GameInput_OnInteractAction(object sender, System.EventArgs e)
-  {
-    if (selectedCounter != null)
-    {
+  private void GameInput_OnInteractAction(object sender, EventArgs e) {
+    if (selectedCounter != null) {
       selectedCounter.Interact();
     }
   }
 
-  private void Update()
-  {
+  private void Update() {
     HandleMovement();
     HandleInteractions();
   }
 
-  public bool IsWalking()
-  {
+  public bool IsWalking() {
     return isWalking;
   }
 
-  private void HandleInteractions()
-  {
+  private void HandleInteractions() {
     Vector2 inputVector = gameInput.GetMovementVectorNormalized();
 
     Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
 
-    if (moveDir != Vector3.zero)
-    {
+    if (moveDir != Vector3.zero) {
       lastInteractDir = moveDir;
     }
 
     float interactionDistance = 2f;
 
-    if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactionDistance, countersLayerMask))
-    {
-      if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter))
-      {
-        if (selectedCounter != clearCounter)
-        {
+    if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactionDistance, countersLayerMask)) {
+      if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter)) {
+        if (selectedCounter != clearCounter) {
           SetSelectedCounter(clearCounter);
         }
       }
-      else
-      {
+      else {
         SetSelectedCounter(null);
       }
     }
-    else
-    {
+    else {
       SetSelectedCounter(null);
     }
 
   }
 
-  private void HandleMovement()
-  {
+  private void HandleMovement() {
 
     Vector2 inputVector = gameInput.GetMovementVectorNormalized();
 
@@ -106,8 +89,7 @@ public class Player : MonoBehaviour
       moveDistance
     );
 
-    if (!canMove)
-    {
+    if (!canMove) {
       Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
 
       canMove = !Physics.CapsuleCast(
@@ -118,13 +100,11 @@ public class Player : MonoBehaviour
         moveDistance
       );
 
-      if (canMove)
-      {
+      if (canMove) {
         moveDir = moveDirX;
       }
 
-      if (!canMove)
-      {
+      if (!canMove) {
         Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
 
 
@@ -136,16 +116,14 @@ public class Player : MonoBehaviour
           moveDistance
         );
 
-        if (canMove)
-        {
+        if (canMove) {
           moveDir = moveDirZ;
         }
 
       }
     }
 
-    if (canMove)
-    {
+    if (canMove) {
       transform.position += moveDir * moveDistance;
     }
 
@@ -155,12 +133,10 @@ public class Player : MonoBehaviour
     transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * rotateSpeed);
   }
 
-  private void SetSelectedCounter(ClearCounter selectedCounter)
-  {
+  private void SetSelectedCounter(ClearCounter selectedCounter) {
     this.selectedCounter = selectedCounter;
 
-    OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventArgs
-    {
+    OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventArgs {
       selectedCounter = selectedCounter
     });
   }
