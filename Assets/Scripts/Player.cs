@@ -6,7 +6,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
 
   public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
   public class OnSelectedCounterChangedEventArgs : EventArgs {
-    public ClearCounter selectedCounter;
+    public BaseCounter selectedCounter;
   }
 
   [SerializeField] private float moveSpeed = 7f;
@@ -18,7 +18,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
 
   private bool isWalking;
   private Vector3 lastInteractDir;
-  private ClearCounter selectedCounter;
+  private BaseCounter baseCounter;
 
   private void Awake() {
     if (Instance != null) {
@@ -32,8 +32,8 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
   }
 
   private void GameInput_OnInteractAction(object sender, EventArgs e) {
-    if (selectedCounter != null) {
-      selectedCounter.Interact(this);
+    if (baseCounter != null) {
+      baseCounter.Interact(this);
     }
   }
 
@@ -58,9 +58,9 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
     float interactionDistance = 2f;
 
     if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactionDistance, countersLayerMask)) {
-      if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter)) {
-        if (selectedCounter != clearCounter) {
-          SetSelectedCounter(clearCounter);
+      if (raycastHit.transform.TryGetComponent(out BaseCounter baseCounter)) {
+        if (this.baseCounter != baseCounter) {
+          SetSelectedCounter(baseCounter);
         }
       }
       else {
@@ -136,11 +136,11 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
     transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * rotateSpeed);
   }
 
-  private void SetSelectedCounter(ClearCounter selectedCounter) {
-    this.selectedCounter = selectedCounter;
+  private void SetSelectedCounter(BaseCounter baseCounter) {
+    this.baseCounter = baseCounter;
 
     OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventArgs {
-      selectedCounter = selectedCounter
+      selectedCounter = baseCounter
     });
   }
 
